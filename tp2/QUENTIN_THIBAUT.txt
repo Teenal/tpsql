@@ -1,0 +1,163 @@
+Requêtes non hiérarchiques : 
+1)
+select emp.ename as emp ,man.ename as man  from quentin_emp emp inner join quentin_emp man on emp.mgr = man.empno;
+
+EMP           MAN
+------------------------- -------------------------
+FORD              JONES
+SCOTT             JONES
+JAMES             BLAKE
+TURNER            BLAKE
+MARTIN            BLAKE
+WARD              BLAKE
+ALLEN             BLAKE
+MILLER            CLARK
+ADAMS             SCOTT
+CLARK             KING
+BLAKE             KING
+
+EMP           MAN
+------------------------- -------------------------
+JONES             KING
+SMITH             FORD
+
+2)
+select emp.ename as emp ,man.ename as man  from quentin_emp emp left join quentin_emp man on emp.mgr = man.empno;
+
+EMP           MAN
+------------------------- -------------------------
+FORD              JONES
+SCOTT             JONES
+JAMES             BLAKE
+TURNER            BLAKE
+MARTIN            BLAKE
+WARD              BLAKE
+ALLEN             BLAKE
+MILLER            CLARK
+ADAMS             SCOTT
+CLARK             KING
+BLAKE             KING
+
+EMP           MAN
+------------------------- -------------------------
+JONES             KING
+SMITH             FORD
+KING
+
+Requêtes hiérarchiques : 
+
+1)
+select empno,ename,job,mgr from quentin_emp start with empno=7698 connect by prior mgr=empno;
+
+     EMPNO ENAME             JOB            MGR
+     ---------- ------------------------- --------------- ----------
+     7698 BLAKE            MANAGER           7839
+     7839 KING           PRESIDENT
+
+2)
+select empno,ename,job,mgr from quentin_emp where level > 1 start with ename='BLAKE' connect by prior empno=mgr;
+
+EMPNO ENAME             JOB            MGR
+---------- ------------------------- --------------- ----------
+7499 ALLEN            SALESMAN          7698
+7521 WARD           SALESMAN          7698
+7654 MARTIN           SALESMAN          7698
+7844 TURNER             SALESMAN          7698
+7900 JAMES            CLERK         7698
+
+3)
+select ename,level from quentin_emp start with mgr is NULL connect by prior empno=mgr order by level;
+
+ENAME                  LEVEL
+------------------------- ----------
+KING                   1
+JONES                  2
+BLAKE                  2
+CLARK                  2
+FORD                   3
+WARD                   3
+JAMES                  3
+MILLER                 3
+ALLEN                  3
+SCOTT                  3
+MARTIN                 3
+
+ENAME                  LEVEL
+------------------------- ----------
+TURNER                 3
+ADAMS                  4
+SMITH                  4
+
+4)
+select ename,level from quentin_emp where ename != 'SCOTT' start with mgr is NULL connect by prior empno=mgr order by level;
+
+ENAME                  LEVEL
+------------------------- ----------
+KING                   1
+BLAKE                  2
+JONES                  2
+CLARK                  2
+FORD                   3
+ALLEN                  3
+JAMES                  3
+MILLER                 3
+WARD                   3
+MARTIN                 3
+TURNER                 3
+
+ENAME                  LEVEL
+------------------------- ----------
+ADAMS                  4
+SMITH                  4
+
+5)
+select ename,level from quentin_emp start with mgr is NULL connect by prior empno=mgr and ename != 'SCOTT' order by level;
+ENAME                  LEVEL
+------------------------- ----------
+KING                   1
+JONES                  2
+BLAKE                  2
+CLARK                  2
+TURNER                 3
+JAMES                  3
+MARTIN                 3
+WARD                   3
+MILLER                 3
+FORD                   3
+ALLEN                  3
+
+ENAME                  LEVEL
+------------------------- ----------
+SMITH                  4
+
+6)
+select ename,level from quentin_emp start with ename = 'JONES' connect by prior empno=mgr order by level;
+
+7)
+select empno,ename,level from quentin_emp start with ename = 'ADAMS' connect by prior mgr=empno order by level;
+EMPNO ENAME              LEVEL
+---------- ------------------------- ----------
+7876 ADAMS                 1
+7788 SCOTT               2
+7566 JONES                 3
+7839 KING                4
+
+8)
+select level,count(level) from quentin_emp start with mgr is null connect by prior empno=mgr group by level order by level;
+
+LEVEL COUNT(LEVEL)
+---------- ------------
+1        1
+2        3
+3        8
+4        2
+
+9)
+select level,avg(sal) from quentin_emp start with mgr is null connect by prior empno=mgr group by level order by level;
+
+LEVEL   AVG(SAL)
+---------- ----------
+1       5000
+2       2758,33333
+3       1731,25
+4       950
